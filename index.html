@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sommarjakten 2026</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0b1b3a;
+      color: white;
+    }
+
+    header {
+      padding: 20px;
+      text-align: center;
+      background: #102a57;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .container {
+      padding: 15px;
+      max-width: 700px;
+      margin: auto;
+    }
+
+    .card {
+      background: #142f5f;
+      padding: 15px;
+      margin-bottom: 12px;
+      border-radius: 10px;
+    }
+
+    .title {
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .dots {
+      font-size: 24px;
+      margin: 10px 0;
+      letter-spacing: 3px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background: #f5c542;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .progress {
+      margin: 10px 0 20px;
+      text-align: center;
+    }
+
+    .bar {
+      height: 10px;
+      background: #1f3d75;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-top: 5px;
+    }
+
+    .bar-fill {
+      height: 10px;
+      background: #4ade80;
+      width: 0%;
+    }
+
+    select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>☀️ Sommarjakten 2026</h1>
+  <div id="playerName"></div>
+</header>
+
+<div class="container">
+
+  <div class="progress">
+    <div id="progressText">0 / 48</div>
+    <div class="bar">
+      <div id="barFill" class="bar-fill"></div>
+    </div>
+  </div>
+
+  <select id="playerSelect"></select>
+
+  <div id="app"></div>
+
+</div>
+
+<script>
+const players = ["Elsa", "Moa", "Emma", "Tilde", "Lovisa"];
+
+const exercises = [
+  "Sprint 20m",
+  "Jonglering",
+  "Passningar mot vägg",
+  "Driva boll slalom",
+  "Snabbhet steg",
+  "Skott på mål",
+  "Upphopp",
+  "Koordination",
+  "Styrka ben",
+  "Balansövning",
+  "1v1 teknik",
+  "Spel med boll"
+];
+
+let state = {};
+
+function load() {
+  const saved = localStorage.getItem("sommarjakten");
+  state = saved ? JSON.parse(saved) : {};
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const player = urlParams.get("player");
+
+  initPlayers(player);
+  render(player || players[0]);
+}
+
+function initPlayers(urlPlayer) {
+  const select = document.getElementById("playerSelect");
+
+  players.forEach(p => {
+    const opt = document.createElement("option");
+    opt.value = p;
+    opt.textContent = p;
+    select.appendChild(opt);
+  });
+
+  select.value = urlPlayer || players[0];
+
+  select.addEventListener("change", (e) => {
+    render(e.target.value);
+  });
+}
+
+function render(player) {
+  document.getElementById("playerName").innerText = "Hej " + player + " 👋";
+
+  const app = document.getElementById("app");
+  app.innerHTML = "";
+
+  let total = 0;
+
+  exercises.forEach((ex, i) => {
+    if (!state[player]) state[player] = {};
+    if (!state[player][i]) state[player][i] = 0;
+
+    const count = state[player][i];
+    total += count;
+
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const dots = "●".repeat(count) + "○".repeat(4 - count);
+
+    card.innerHTML = `
+      <div class="title">${ex}</div>
+      <div class="dots">${dots}</div>
+      <button onclick="add('${player}', ${i})">+ Genomför</button>
+    `;
+
+    app.appendChild(card);
+  });
+
+  updateProgress(player, total);
+}
+
+function add(player, index) {
+  if (!state[player]) state[player] = {};
+  if (!state[player][index]) state[player][index] = 0;
+
+  if (state[player][index] < 4) {
+    state[player][index]++;
+    localStorage.setItem("sommarjakten", JSON.stringify(state));
+    render(player);
+  }
+}
+
+function updateProgress(player, total) {
+  const percent = Math.round((total / 48) * 100);
+
+  document.getElementById("progressText").innerText =
+    total + " / 48 (" + percent + "%)";
+
+  document.getElementById("barFill").style.width = percent + "%";
+}
+
+load();
+</script>
+
+</body>
+</html>
