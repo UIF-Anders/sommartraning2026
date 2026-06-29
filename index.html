@@ -19,10 +19,7 @@
       background: #102a57;
     }
 
-    h1 {
-      margin: 0;
-      font-size: 22px;
-    }
+    h1 { margin: 0; font-size: 22px; }
 
     .container {
       padding: 15px;
@@ -44,22 +41,32 @@
 
     .dots {
       font-size: 24px;
-      margin: 10px 0;
       letter-spacing: 3px;
+      margin: 10px 0;
+    }
+
+    .btnrow {
+      display: flex;
+      gap: 10px;
     }
 
     button {
-      width: 100%;
+      flex: 1;
       padding: 10px;
       border: none;
       border-radius: 8px;
-      background: #f5c542;
       font-weight: bold;
       cursor: pointer;
     }
 
-    button:active {
-      transform: scale(0.98);
+    .add {
+      background: #22c55e;
+      color: black;
+    }
+
+    .remove {
+      background: #ef4444;
+      color: white;
     }
 
     .progress {
@@ -183,7 +190,11 @@ function render(player) {
     card.innerHTML = `
       <div class="title">${ex}</div>
       <div class="dots">${dots}</div>
-      <button onclick="add('${player}', ${i})">+ Genomför</button>
+
+      <div class="btnrow">
+        <button class="add" onclick="add('${player}', ${i})">➕ Lägg till</button>
+        <button class="remove" onclick="remove('${player}', ${i})">➖ Ta bort</button>
+      </div>
     `;
 
     app.appendChild(card);
@@ -198,9 +209,24 @@ function add(player, index) {
 
   if (state[player][index] < 4) {
     state[player][index]++;
-    localStorage.setItem("sommarjakten", JSON.stringify(state));
+    save();
     render(player);
   }
+}
+
+function remove(player, index) {
+  if (!state[player]) return;
+  if (!state[player][index]) state[player][index] = 0;
+
+  if (state[player][index] > 0) {
+    state[player][index]--;
+    save();
+    render(player);
+  }
+}
+
+function save() {
+  localStorage.setItem("sommarjakten", JSON.stringify(state));
 }
 
 function updateProgress(player, total) {
